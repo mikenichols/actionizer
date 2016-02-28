@@ -15,5 +15,9 @@ module Actionizer
       !@success
     end
 
+    def fail
+      @success = false
+    end
+
   end
 end

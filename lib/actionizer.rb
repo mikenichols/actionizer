@@ -1,4 +1,5 @@
 require 'actionizer/result'
+require 'actionizer/failure'
 require 'actionizer/version'
 
 module Actionizer
@@ -13,6 +14,8 @@ module Actionizer
   module ClassMethods
     def call(inputs = {})
       new(inputs).tap(&:call).result
+    rescue Actionizer::Failure => af
+      af.result
     end
   end
 
@@ -26,5 +29,13 @@ module Actionizer
         attr_reader key
       end
     end
+  end
+
+  def fail!(params = {})
+    params.each_pair { |key, value| result[key] = value }
+
+    result.fail
+
+    raise Actionizer::Failure.new('Failed!', result)
   end
 end

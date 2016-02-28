@@ -46,5 +46,28 @@ describe Actionizer do
     end
   end
 
-  # describe 'fail!'
+  describe 'fail!' do
+    let(:result) { dummy_class.call }
+
+    before do
+      dummy_class.class_eval do
+        def call
+          fail!(error: 'error message')
+          raise RuntimeError
+        end
+      end
+    end
+
+    it 'fails immediately' do
+      dummy_class.call
+    end
+
+    it 'sets the result to be failure' do
+      expect(result).to be_failure
+    end
+
+    it 'sets fields in the result that you pass into fail!' do
+      expect(result.error).to eq('error message')
+    end
+  end
 end
