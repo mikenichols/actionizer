@@ -1,6 +1,9 @@
-require "actionizer/version"
+require 'actionizer/result'
+require 'actionizer/version'
 
 module Actionizer
+  attr_reader :result
+
   def self.included(base)
     base.class_eval do
       extend ClassMethods
@@ -9,11 +12,13 @@ module Actionizer
 
   module ClassMethods
     def call(inputs = {})
-      new(inputs).call
+      new(inputs).tap(&:call).result
     end
   end
 
   def initialize(inputs = {})
+    @result = Actionizer::Result.new
+
     inputs.each_pair do |key, value|
       instance_variable_set("@#{key}".to_sym, value)
 

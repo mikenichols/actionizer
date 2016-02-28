@@ -33,4 +33,18 @@ describe Actionizer do
 
     it 'allows an inputs block to define required and optional params'
   end
+
+  context 'result' do
+    it 'is returned' do
+      result = dummy_class.call
+      expect(result).to be_an(Actionizer::Result)
+    end
+
+    it 'is successful by default' do
+      result = dummy_class.call
+      expect(result).to be_success
+    end
+  end
+
+  # describe 'fail!'
 end
