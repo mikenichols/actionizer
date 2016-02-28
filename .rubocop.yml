@@ -1,0 +1,11 @@
+Metrics/LineLength:
+  Max: 120
+
+Style/Documentation:
+  Enabled: false
+Style/EmptyLinesAroundClassBody:
+  Enabled: false
+Style/MutableConstant:
+  Enabled: false
+Style/TrivialAccessors:
+  Enabled: false
