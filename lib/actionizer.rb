@@ -38,4 +38,15 @@ module Actionizer
 
     raise Actionizer::Failure.new('Failed!', result)
   end
+
+  def call_and_check_failure!(action_class, params = {})
+    unless action_class.include? Actionizer
+      raise ArgumentError, "#{action_class.name} must include Actionizer"
+    end
+
+    local_result = action_class.call(params)
+    fail!(error: local_result.error) if local_result.failure?
+
+    local_result
+  end
 end

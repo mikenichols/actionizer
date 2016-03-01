@@ -3,6 +3,8 @@ Metrics/LineLength:
 
 Style/Documentation:
   Enabled: false
+Style/EmptyLinesAroundBlockBody:
+  Enabled: false
 Style/EmptyLinesAroundClassBody:
   Enabled: false
 Style/MutableConstant:
