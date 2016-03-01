@@ -23,6 +23,8 @@ module Actionizer
     @result = Actionizer::Result.new
 
     inputs.each_pair do |key, value|
+      next if key.to_s == 'result'
+
       instance_variable_set("@#{key}".to_sym, value)
 
       self.class.class_eval do

@@ -44,6 +44,18 @@ describe Actionizer do
       result = dummy_class.call
       expect(result).to be_success
     end
+
+    context 'when you pass in a key of result as input' do
+      it 'does not overwrite it' do
+        dummy_class.class_eval do
+          def call
+            raise RuntimeError if result == 'nope'
+          end
+        end
+
+        dummy_class.call(result: 'nope')
+      end
+    end
   end
 
   describe '#fail!' do
@@ -98,7 +110,7 @@ describe Actionizer do
 
     it 'returns an Actionizer::Result' do
       result = dummy_class.new.call_and_check_failure!(success_action_class)
-      expect(result).to be_a(Actionizer::Result)
+      expect(result).to be_an(Actionizer::Result)
     end
 
     context "when you don't pass a calls that includes Actionizer" do
