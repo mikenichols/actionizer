@@ -1,5 +1,9 @@
 # Actionizer
 
+[![Build Status](https://travis-ci.org/mikenichols/actionizer.svg?branch=master)](https://travis-ci.org/mikenichols/actionizer)
+[![Test Coverage](https://codeclimate.com/github/mikenichols/actionizer/badges/coverage.svg)](https://codeclimate.com/github/mikenichols/actionizer/coverage)
+[![Code Climate](https://codeclimate.com/github/mikenichols/actionizer/badges/gpa.svg)](https://codeclimate.com/github/mikenichols/actionizer)
+
 ## Turn your classes into small, modular, resuable Actions!
 
 ## Installation
