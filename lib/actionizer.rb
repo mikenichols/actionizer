@@ -3,7 +3,7 @@ require 'actionizer/failure'
 require 'actionizer/version'
 
 module Actionizer
-  attr_reader :result
+  attr_reader :output
 
   def self.included(base)
     base.class_eval do
@@ -13,17 +13,17 @@ module Actionizer
 
   module ClassMethods
     def call(inputs = {})
-      new(inputs).tap(&:call).result
+      new(inputs).tap(&:call).output
     rescue Actionizer::Failure => af
-      af.result
+      af.output
     end
   end
 
   def initialize(inputs = {})
-    @result = Actionizer::Result.new
+    @output = Actionizer::Result.new
 
     inputs.each_pair do |key, value|
-      next if key.to_s == 'result'
+      next if key.to_s == 'output'
 
       instance_variable_set("@#{key}".to_sym, value)
 
@@ -34,11 +34,11 @@ module Actionizer
   end
 
   def fail!(params = {})
-    params.each_pair { |key, value| result[key] = value }
+    params.each_pair { |key, value| output[key] = value }
 
-    result.fail
+    output.fail
 
-    raise Actionizer::Failure.new('Failed!', result)
+    raise Actionizer::Failure.new('Failed!', output)
   end
 
   def call_and_check_failure!(action_class, params = {})
@@ -46,9 +46,9 @@ module Actionizer
       raise ArgumentError, "#{action_class.name} must include Actionizer"
     end
 
-    local_result = action_class.call(params)
-    fail!(error: local_result.error) if local_result.failure?
+    result = action_class.call(params)
+    fail!(error: result.error) if result.failure?
 
-    local_result
+    result
   end
 end

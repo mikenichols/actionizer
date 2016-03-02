@@ -34,8 +34,8 @@ describe Actionizer do
     it 'allows an inputs block to define required and optional params'
   end
 
-  context 'result' do
-    it 'is returned' do
+  context 'output' do
+    it 'is an Actionizer::Result' do
       result = dummy_class.call
       expect(result).to be_an(Actionizer::Result)
     end
@@ -45,15 +45,15 @@ describe Actionizer do
       expect(result).to be_success
     end
 
-    context 'when you pass in a key of result as input' do
+    context 'when you pass in a key of output as input' do
       it 'does not overwrite it' do
         dummy_class.class_eval do
           def call
-            raise RuntimeError if result == 'nope'
+            raise RuntimeError if output == 'nope'
           end
         end
 
-        dummy_class.call(result: 'nope')
+        dummy_class.call(output: 'nope')
       end
     end
   end
@@ -74,11 +74,11 @@ describe Actionizer do
       dummy_class.call
     end
 
-    it 'sets the result to be failure' do
+    it 'sets the output to be failure' do
       expect(result).to be_failure
     end
 
-    it 'sets fields in the result that you pass into fail!' do
+    it 'sets fields in the output that you pass into fail!' do
       expect(result.error).to eq('error message')
     end
   end

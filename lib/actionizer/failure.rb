@@ -1,9 +1,9 @@
 module Actionizer
   class Failure < StandardError
-    attr_reader :result
+    attr_reader :output
 
-    def initialize(msg, result)
-      @result = result
+    def initialize(msg, output)
+      @output = output
       super msg
     end
 
