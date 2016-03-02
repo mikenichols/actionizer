@@ -9,9 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Mike Nichols']
   spec.email         = ['mykphyre@yahoo.com']
 
-  spec.summary       = 'TODO: Write a short summary, because Rubygems requires one.'
-  spec.description   = 'TODO: Write a longer description or delete this line.'
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = 'Turn your classes into small, modular, reusable Actions'
+  spec.homepage      = 'https://github.com/mikenichols/actionizer'
   spec.license       = 'MIT'
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
