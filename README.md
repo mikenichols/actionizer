@@ -64,7 +64,7 @@ module Action
 end
 ```
 
-Here's how you invoke it:
+Inputs are available on the `input` instance variable. Actions are invoked with the `call` method.
 ```ruby
 module Action
   module Users
@@ -73,10 +73,10 @@ module Action
       include Actionizer
 
       def call
-        result = Action::Users::Create.call(name: name, email: email)
+        result = Action::Users::Create.call(name: input.name, email: input.email)
         fail!(error: result.error) if result.failure?
 
-        result = Action::Users::SendWelcomeEmail.call(name: name, email: email)
+        result = Action::Users::SendWelcomeEmail.call(name: input.name, email: input.email)
         fail!(error: result.error) if result.failure?
       end
     end
@@ -95,8 +95,8 @@ module Action
 
       def call
         # This code is identical to the example above
-        call_and_check_failure!(Action::Users::Create, name: name, email: email)
-        call_and_check_failure!(Action::Users::SendWelcomeEmail, name: name, email: email)
+        call_and_check_failure!(Action::Users::Create, name: input.name, email: input.email)
+        call_and_check_failure!(Action::Users::SendWelcomeEmail, name: input.name, email: input.email)
       end
     end
 
