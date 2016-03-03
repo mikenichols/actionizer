@@ -3,7 +3,7 @@ require 'actionizer/failure'
 require 'actionizer/version'
 
 module Actionizer
-  attr_reader :output
+  attr_reader :input, :output
 
   def self.included(base)
     base.class_eval do
@@ -19,18 +19,9 @@ module Actionizer
     end
   end
 
-  def initialize(inputs = {})
+  def initialize(initial_input = {})
+    @input = Hashie::Mash.new(initial_input)
     @output = Actionizer::Result.new
-
-    inputs.each_pair do |key, value|
-      next if key.to_s == 'output'
-
-      instance_variable_set("@#{key}".to_sym, value)
-
-      self.class.class_eval do
-        attr_reader key
-      end
-    end
   end
 
   def fail!(params = {})

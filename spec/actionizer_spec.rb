@@ -19,16 +19,16 @@ describe Actionizer do
     dummy_class.call
   end
 
-  context 'inputs' do
-    it 'makes them accessible inside the instance' do
+  context 'input' do
+    it "makes passed-in values accessible on 'input'" do
       dummy_class.class_eval do
         def call
-          raise RuntimeError unless input1 == 'abc'
-          raise RuntimeError unless input2 == %w(do re mi)
+          raise RuntimeError unless input.foo == 'abc'
+          raise RuntimeError unless input.bar == %w(do re mi)
         end
       end
 
-      dummy_class.call(input1: 'abc', input2: %w(do re mi))
+      dummy_class.call(foo: 'abc', bar: %w(do re mi))
     end
 
     it 'allows an inputs block to define required and optional params'
@@ -38,18 +38,6 @@ describe Actionizer do
     it 'is an Actionizer::Result' do
       result = dummy_class.call
       expect(result).to be_an(Actionizer::Result)
-    end
-
-    context 'when you pass in a key of output as input' do
-      it 'does not overwrite it' do
-        dummy_class.class_eval do
-          def call
-            raise RuntimeError if output == 'nope'
-          end
-        end
-
-        dummy_class.call(output: 'nope')
-      end
     end
   end
 
@@ -97,8 +85,8 @@ describe Actionizer do
     before do
       dummy_class.class_eval do
         def call
-          call_and_check_failure!(first_class, foo: 'bar')
-          second_class.call
+          call_and_check_failure!(input.first_class, foo: 'bar')
+          input.second_class.call
         end
       end
     end
