@@ -40,11 +40,6 @@ describe Actionizer do
       expect(result).to be_an(Actionizer::Result)
     end
 
-    it 'is successful by default' do
-      result = dummy_class.call
-      expect(result).to be_success
-    end
-
     context 'when you pass in a key of output as input' do
       it 'does not overwrite it' do
         dummy_class.class_eval do

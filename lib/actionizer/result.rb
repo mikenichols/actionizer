@@ -3,8 +3,10 @@ require 'hashie'
 module Actionizer
   class Result < Hashie::Mash
 
-    def initialize
+    def initialize(initial_hash = {})
       @success = true
+
+      initial_hash.each_pair { |key, value| self[key] = value }
     end
 
     def success?
