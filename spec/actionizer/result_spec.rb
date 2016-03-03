@@ -25,6 +25,14 @@ module Actionizer
       expect(result).to respond_to(:failure?)
     end
 
+    describe '#fail' do
+      it 'changes the state to be failure' do
+        expect(result).to be_success
+        result.fail
+        expect(result).to be_failure
+      end
+    end
+
     it 'allows arbitrary fields to be set' do
       result.field = 'value'
       expect(result.field).to eq('value')
