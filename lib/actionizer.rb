@@ -6,9 +6,7 @@ module Actionizer
   attr_reader :input, :output
 
   def self.included(base)
-    base.class_eval do
-      extend ClassMethods
-    end
+    base.extend(ClassMethods)
   end
 
   module ClassMethods
