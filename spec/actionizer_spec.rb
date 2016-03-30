@@ -12,11 +12,6 @@ describe Actionizer do
     expect(Actionizer::VERSION).not_to be_nil
   end
 
-  it 'invokes #call when you invoke .call' do
-    expect_any_instance_of(dummy_class).to receive(:call)
-    dummy_class.call
-  end
-
   context 'when an instance method is defined on a class' do
     let(:class_with_execute) do
       Class.new do
@@ -25,13 +20,13 @@ describe Actionizer do
       end
     end
 
-    it 'correctly tells you it responds to the method name' do
-      expect(class_with_execute.respond_to?(:execute)).to eq(true)
-    end
-
     it 'invokes the instance method when you invoke the class method' do
       expect_any_instance_of(class_with_execute).to receive(:execute)
       class_with_execute.execute
+    end
+
+    it 'correctly tells you it responds to the method name' do
+      expect(class_with_execute.respond_to?(:execute)).to eq(true)
     end
 
     it "doesn't allow you to call undefined methods" do
@@ -86,7 +81,7 @@ describe Actionizer do
     end
   end
 
-  describe '#call_and_check_failure!' do
+  describe '#*_or_fail' do
     let(:success_action_class) do
       Class.new do
         include Actionizer
@@ -105,20 +100,20 @@ describe Actionizer do
     before do
       dummy_class.class_eval do
         def call
-          call_and_check_failure!(input.first_class, foo: 'bar')
+          call_or_fail(input.first_class, foo: 'bar')
           input.second_class.call
         end
       end
     end
 
     it 'returns an Actionizer::Result' do
-      result = dummy_class.new.call_and_check_failure!(success_action_class)
+      result = dummy_class.new.call_or_fail(success_action_class)
       expect(result).to be_an(Actionizer::Result)
     end
 
-    context "when you don't pass a calls that includes Actionizer" do
+    context "when you pass a class that doesn't include Actionizer" do
       it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_and_check_failure!(Object) }.to raise_error(ArgumentError)
+        expect { dummy_class.new.call_or_fail(Object) }.to raise_error(ArgumentError)
       end
     end
 
@@ -144,6 +139,30 @@ describe Actionizer do
 
         expect(result).to be_failure
         expect(result.error).to eq('inner error')
+      end
+    end
+
+    context 'dynamic <FOO>_or_fail invocation' do
+      let(:class_with_find) do
+        Class.new do
+          include Actionizer
+          def find; end
+        end
+      end
+
+      it 'allows any method <FOO>_or_fail, as long as the class defines <FOO>' do
+        expect(class_with_find).to receive(:find).with(id: 1234).and_call_original
+        expect_any_instance_of(class_with_find).to receive(:find).and_call_original
+        dummy_class.new.find_or_fail(class_with_find, id: 1234)
+      end
+
+      it 'correctly tells you it responds to the method' do
+        expect(dummy_class.new.respond_to?(:whatever_or_fail)).to eq(true)
+      end
+
+      it 'still fails if you call a method not defined on the specified class' do
+        expect(class_with_find).to receive(:nope).and_call_original
+        expect { dummy_class.new.nope_or_fail(class_with_find) }.to raise_error(NoMethodError)
       end
     end
 
