@@ -4,9 +4,7 @@ describe Actionizer do
   let(:dummy_class) do
     Class.new do
       include Actionizer
-
-      def call
-      end
+      def call; end
     end
   end
 
@@ -17,6 +15,28 @@ describe Actionizer do
   it 'invokes #call when you invoke .call' do
     expect_any_instance_of(dummy_class).to receive(:call)
     dummy_class.call
+  end
+
+  context 'when an instance method is defined on a class' do
+    let(:class_with_execute) do
+      Class.new do
+        include Actionizer
+        def execute; end
+      end
+    end
+
+    it 'correctly tells you it responds to the method name' do
+      expect(class_with_execute.respond_to?(:execute)).to eq(true)
+    end
+
+    it 'invokes the instance method when you invoke the class method' do
+      expect_any_instance_of(class_with_execute).to receive(:execute)
+      class_with_execute.execute
+    end
+
+    it "doesn't allow you to call undefined methods" do
+      expect { class_with_execute.not_defined }.to raise_error(NoMethodError)
+    end
   end
 
   context 'input' do

@@ -10,10 +10,20 @@ module Actionizer
   end
 
   module ClassMethods
-    def call(inputs = {})
-      new(inputs).tap(&:call).output
+    def method_missing(method_name, *args, &block)
+      instance = new(*args)
+
+      if instance.respond_to?(method_name)
+        instance.tap(&method_name).output
+      else
+        super
+      end
     rescue Actionizer::Failure => af
       af.output
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      new.respond_to?(method_name, include_private)
     end
   end
 
