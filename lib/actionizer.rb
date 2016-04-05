@@ -1,3 +1,4 @@
+require 'recursive_open_struct'
 require 'actionizer/result'
 require 'actionizer/failure'
 require 'actionizer/version'
@@ -28,7 +29,7 @@ module Actionizer
   end
 
   def initialize(initial_input = {})
-    @input = Hashie::Mash.new(initial_input)
+    @input = RecursiveOpenStruct.new(initial_input)
     @output = Actionizer::Result.new
   end
 
