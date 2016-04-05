@@ -1,12 +1,11 @@
-require 'hashie'
+require 'recursive_open_struct'
 
 module Actionizer
-  class Result < Hashie::Mash
+  class Result < RecursiveOpenStruct
 
     def initialize(initial_hash = {})
       @success = true
-
-      initial_hash.each_pair { |key, value| self[key] = value }
+      super(initial_hash, preserve_original_keys: true)
     end
 
     def success?
