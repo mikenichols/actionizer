@@ -1,11 +1,11 @@
-require 'recursive_open_struct'
+require 'ostruct'
 
 module Actionizer
-  class Result < RecursiveOpenStruct
+  class Result < OpenStruct
 
     def initialize(initial_hash = {})
       @success = true
-      super(initial_hash, preserve_original_keys: true)
+      super(initial_hash)
     end
 
     def success?
