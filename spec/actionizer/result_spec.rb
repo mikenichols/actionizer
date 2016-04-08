@@ -3,11 +3,9 @@ require 'spec_helper'
 module Actionizer
   describe Result do
     subject { described_class.new(initial_hash) }
-    let(:initial_hash) { {} }
+    let(:initial_hash) { { foo: 'value' } }
 
     describe '#initialize' do
-      let(:initial_hash) { { foo: 'value' } }
-
       it 'defaults to being successful' do
         expect(subject).to be_success
       end
@@ -26,6 +24,14 @@ module Actionizer
           expect(subject[:string_key]).to eq(value)
         end
       end
+
+      context 'when initialized with nested Hashes' do
+        let(:initial_hash) { { foo: { ima: 'hash' } } }
+
+        it 'leaves them as Hashes' do
+          expect(subject.foo).to be_a(Hash)
+        end
+      end
     end
 
     it 'has a success? method' do
@@ -41,9 +47,21 @@ module Actionizer
         expect(subject.to_h).to eq(initial_hash)
       end
 
-      context 'when initialized with non-symbol keys' do
-        let(:initial_hash) { { 'string_key' => 'val', symbol_key: 'val', 123 => 'val' } }
-        it 'does not modify key types' do
+      context 'when initialized with top-level non-symbol keys' do
+        let(:initial_hash) { { 'string_key' => 'val', symbol_key: 'val' } }
+        let(:modified_hash) { { string_key: 'val', symbol_key: 'val' } }
+
+        it 'coerces top-level keys to be symbols' do
+          expect(subject.to_h).to eq(modified_hash)
+        end
+      end
+
+      context 'when initialized with nested non-symbol keys' do
+        let(:initial_hash) do
+          { top_level: { sym_key: 'a', 'string_key' => 'b', 123 => 'c' } }
+        end
+
+        it 'does not modify the nested keys' do
           expect(subject.to_h).to eq(initial_hash)
         end
       end
