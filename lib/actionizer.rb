@@ -45,13 +45,19 @@ module Actionizer
   def method_missing(method_name, *args, &block)
     return super unless method_name.to_s.end_with?('_or_fail')
 
-    action_class, params = *args
+    action_class, *params = args
+    underlying_method = method_name.to_s.chomp('_or_fail')
 
-    unless action_class.include? Actionizer
-      raise ArgumentError, "#{action_class.name} must include Actionizer"
+    unless action_class.respond_to?(underlying_method)
+      raise ArgumentError, "#{action_class.name} must define ##{underlying_method}"
     end
 
-    result = action_class.send(method_name.to_s.chomp('_or_fail'), params)
+    result = action_class.send(underlying_method, *params)
+
+    unless result.is_a?(Actionizer::Result)
+      raise ArgumentError, "#{action_class.name}##{underlying_method} must return an Actionizer::Result"
+    end
+
     fail!(error: result.error) if result.failure?
 
     result
