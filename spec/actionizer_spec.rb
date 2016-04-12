@@ -111,9 +111,29 @@ describe Actionizer do
       expect(result).to be_an(Actionizer::Result)
     end
 
-    context "when you pass a class that doesn't include Actionizer" do
+    context "when you pass a class that doesn't implement the invoked method" do
       it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(Object) }.to raise_error(ArgumentError)
+        expect { dummy_class.new.call_or_fail(Object) }
+          .to raise_error(ArgumentError, 'Object must define #call')
+      end
+    end
+
+    context 'when the method does not return an Actionizer::Result' do
+      let(:non_conforming_class) do
+        Class.new do
+          def self.call(_params, _arg2)
+            { success: true }
+          end
+
+          def self.name
+            'AnonymousClass'
+          end
+        end
+      end
+
+      it 'raises an ArgumentError' do
+        expect { dummy_class.new.call_or_fail(non_conforming_class, 1, 2) }
+          .to raise_error(ArgumentError, 'AnonymousClass#call must return an Actionizer::Result')
       end
     end
 
