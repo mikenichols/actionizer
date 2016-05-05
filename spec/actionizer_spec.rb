@@ -118,7 +118,7 @@ describe Actionizer do
       end
     end
 
-    context 'when the method does not return an Actionizer::Result' do
+    context "when the result doesn't respond to :failure?" do
       let(:non_conforming_class) do
         Class.new do
           def self.call(_params, _arg2)
@@ -133,7 +133,22 @@ describe Actionizer do
 
       it 'raises an ArgumentError' do
         expect { dummy_class.new.call_or_fail(non_conforming_class, 1, 2) }
-          .to raise_error(ArgumentError, 'AnonymousClass#call must return an Actionizer::Result')
+          .to raise_error(ArgumentError, "AnonymousClass#call's result must respond to :failure?")
+      end
+    end
+
+    context 'when the method returns nil' do
+      let(:non_conforming_class) do
+        Class.new do
+          def self.call(_params, _arg2)
+            nil
+          end
+        end
+      end
+
+      it 'raises an ArgumentError' do
+        expect { dummy_class.new.call_or_fail(non_conforming_class, 1, 2) }
+          .to raise_error(ArgumentError)
       end
     end
 

@@ -54,11 +54,12 @@ module Actionizer
 
     result = action_class.send(underlying_method, *params)
 
-    unless result.is_a?(Actionizer::Result)
-      raise ArgumentError, "#{action_class.name}##{underlying_method} must return an Actionizer::Result"
+    unless result.respond_to?(:failure?)
+      raise ArgumentError, "#{action_class.name}##{underlying_method}'s result must respond to :failure?"
     end
 
-    fail!(error: result.error) if result.failure?
+    error = result.respond_to?(:error) ? result.error : "Unknown: Your result doesn't respond to :error"
+    fail!(error: error) if result.failure?
 
     result
   end
