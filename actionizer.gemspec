@@ -34,4 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry-byebug', '~> 3.3'
   spec.add_development_dependency 'rubocop', '~> 0.37'
   spec.add_development_dependency 'simplecov', '~> 0.11'
+  spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.5'
 end
