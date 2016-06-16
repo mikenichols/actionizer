@@ -188,7 +188,7 @@ describe Actionizer do
 
         it 'calls fail! and passes on result.errors_xxxxx and skips calling the second class' do
           expect(failure_action_class).to receive(:call)
-                                            .with(foo: 'bar').once.and_call_original
+            .with(foo: 'bar').once.and_call_original
           expect(success_action_class).not_to receive(:call)
 
           result = dummy_class.call(first_class: failure_action_class,
