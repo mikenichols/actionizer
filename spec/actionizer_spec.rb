@@ -175,6 +175,29 @@ describe Actionizer do
         expect(result).to be_failure
         expect(result.error).to eq('inner error')
       end
+
+      context 'and error response field begins with "error" but has additional characters' do
+        let(:failure_action_class) do
+          Class.new do
+            include Actionizer
+            def call
+              fail!(errors_xxxxx: 'inner error')
+            end
+          end
+        end
+
+        it 'calls fail! and passes on result.errors_xxxxx and skips calling the second class' do
+          expect(failure_action_class).to receive(:call)
+                                            .with(foo: 'bar').once.and_call_original
+          expect(success_action_class).not_to receive(:call)
+
+          result = dummy_class.call(first_class: failure_action_class,
+                                    second_class: success_action_class)
+
+          expect(result).to be_failure
+          expect(result.errors_xxxxx).to eq('inner error')
+        end
+      end
     end
 
     context 'dynamic <FOO>_or_fail invocation' do
