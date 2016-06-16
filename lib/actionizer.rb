@@ -58,10 +58,8 @@ module Actionizer
       raise ArgumentError, "#{action_class.name}##{underlying_method}'s result must respond to :failure?"
     end
 
-    errors = result.to_h.select { |k,_v| k.to_s.start_with? 'error' }
-    unless errors.any?
-      errors[:error] = "Unknown: Your result doesn't respond to a method beginning with 'error'"
-    end
+    errors = result.to_h.select { |k, _v| k.to_s.start_with? 'error' }
+    errors[:error] = "Unknown: Your result doesn't respond to a method beginning with 'error'" unless errors.any?
     fail!(errors) if result.failure?
 
     result
