@@ -84,12 +84,9 @@ module Actionizer
 
     result = action_class.send(underlying_method, *params)
 
-    if !result.respond_to?(:failure?)
-      raise ArgumentError, "#{action_class.name}##{underlying_method}'s result must respond to :failure?"
-    end
+    verify_result_is_conforming!(result, "#{action_class.name}##{underlying_method}")
 
-    errors = result.to_h.select { |k, _v| k.to_s.start_with? 'error' }
-    errors[:error] = "Unknown: Your result doesn't respond to a method beginning with 'error'" if errors.empty?
+    errors = result.to_h.select { |key, _value| key.to_s.start_with?('error') }
     fail!(errors) if result.failure?
 
     result
@@ -97,5 +94,13 @@ module Actionizer
 
   def respond_to_missing?(method_name, _include_private = false)
     method_name.to_s.end_with?('_or_fail')
+  end
+
+  private
+
+  def verify_result_is_conforming!(result, class_and_method)
+    raise ArgumentError, "#{class_and_method}'s result must respond to :to_h" if !result.respond_to?(:to_h)
+
+    raise ArgumentError, "#{class_and_method}'s result must respond to :failure?" if !result.respond_to?(:failure?)
   end
 end
