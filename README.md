@@ -1,12 +1,19 @@
 # Actionizer
 
+[![Gem Version](https://badge.fury.io/rb/actionizer.svg)](https://badge.fury.io/rb/actionizer)
 [![Build Status](https://travis-ci.org/mikenichols/actionizer.svg?branch=master)](https://travis-ci.org/mikenichols/actionizer)
 [![Test Coverage](https://codeclimate.com/github/mikenichols/actionizer/badges/coverage.svg)](https://codeclimate.com/github/mikenichols/actionizer/coverage)
 [![Code Climate](https://codeclimate.com/github/mikenichols/actionizer/badges/gpa.svg)](https://codeclimate.com/github/mikenichols/actionizer)
 
 ## Turn your classes into small, modular, resuable Actions!
 
-## Installation
+This gem is an implementation of the Interactor pattern. This pattern has also been called [Ports and Adapters](http://www.dossier-andreas.net/software_architecture/ports_and_adapters.html) or [Hexagonal Architecture](http://victorsavkin.com/post/42542190528/hexagonal-architecture-for-rails-developers) or [DCI (Data-Context-Interaction)](https://en.wikipedia.org/wiki/Data,_context_and_interaction) but the ideas are pretty much the same. Its goal is to provide a simple pattern for writing truly single-purpose classes. These classes are then easy to reason about, easy to test, and easy to change. They aren't coupled to all sorts of other parts of your system; they are self-contained and perform one and only one action.
+
+This is not remotely a new or unique idea as there have been [many](http://blog.8thlight.com/uncle-bob/2011/11/22/Clean-Architecture.html) [awesome](http://jamesgolick.com/2010/3/14/crazy-heretical-and-awesome-the-way-i-write-rails-apps.html) [articles](http://jeffreypalermo.com/blog/the-onion-architecture-part-1/) and previous [projects](https://github.com/collectiveidea/interactor/) written to implement clean, modular classes. Uncle Bob even wrote a [great post](https://blog.8thlight.com/uncle-bob/2012/08/13/the-clean-architecture.html) highlighting similarities between the big architectural ideas of the last decade or so. While you should totally go read that article, I'll summarize it here for you. Your app is not your framework. It's super effective to decouple your business logic from your framework, database, UI, and third-party APIs.
+
+I like to think of your business logic as being the "gooey center" of your app. That's where the most critical code lives. You want to keep it isolated from the details of databases, file systems, and networks. This inner layer should be so simple as to be boring because it's crucial to get it correct, so you want to make the code clean and simple, even stupid simple. `Actionizer` will help you write boring, stupid simple code.
+
+### Installation
 
 Add this line to your application's Gemfile:
 
@@ -14,15 +21,11 @@ Add this line to your application's Gemfile:
 gem 'actionizer'
 ```
 
-And then execute:
+And then run:
 
-    $ bundle
+    $ bundle install
 
-Or install it yourself as:
-
-    $ gem install actionizer
-
-## Usage
+### Basic usage
 
 Include `Actionizer` in your class and define an instance method. That instance method will be automatically invoked when you call the class method of the same name. Any Action defined with `Actionizer` will automatically return a hash-like result you can check for `success?` or `failure?`.
 
@@ -39,6 +42,8 @@ class CreateUser
 end
 ```
 
+### Check result status with `success?` and `failure?`
+
 Actions are successful by default:
 ```ruby
 result = SuccessfulAction.call(id: 1234)
@@ -48,6 +53,8 @@ result.success?
 result.failure?
 #=> false
 ```
+
+### Signal failure with `fail!`
 
 You can immediately stop execution with the `fail!` method.
 ```ruby
@@ -64,7 +71,7 @@ class DeleteAccount
 end
 ```
 
-When an action fails with `fail!`, the result it returns will return false for `success?` and true for `failure?`.
+When you fail an action with `fail!`, the result it returns will return true for `failure?` and false for `success?`.
 ```ruby
 result = FailingAction.call(id: 1234)
 
@@ -74,7 +81,9 @@ result.failure?
 #=> true
 ```
 
-The most common way to use Actionizer is to compose small pieces of functionality (which can themselves be Actions) into larger pieces of functionality to give that sequence of Actions a name and simple interface.
+### Composing Actions
+
+The most common way to use `Actionizer` is to compose small pieces of functionality (which can themselves be Actions) into larger pieces of functionality to give that sequence of Actions a name and simple interface. Say you want to create a user and send them a welcome email as part of the onboarding process. Then you might do something like this:
 ```ruby
 class OnboardUser
   include Actionizer
@@ -89,8 +98,11 @@ class OnboardUser
 end
 ```
 
+This code is self-documenting because there's no wiki or comments to read about what's going on here. The code is telling you exactly what's going on.
 
-This pattern is so common, there's a shorthand: `<METHOD>_or_fail`. It works for any instance method defined on the class you specify.
+### Error-checking shorthand: `*_or_fail`
+
+To automatically check for `failure?` and bubble up errors on failure, there's a shorthand: `<METHOD>_or_fail`. It works for any instance method defined on the class you specify.
 ```ruby
 class OnboardUser
   include Actionizer
@@ -103,6 +115,31 @@ class OnboardUser
 end
 ```
 
+### Explicitly declare your inputs with `inputs_for`
+
+To more explicitly document the inputs to your Actions, you can use `inputs_for`.
+```ruby
+class CreateUser
+  include Actionizer
+
+  inputs_for :call do
+    required :name
+    required :email
+    optional :phone_number
+  end
+  def call
+    result = CreateUser.call(user_params)
+  end
+
+  private
+
+  def user_params
+    { name: input.name, email: input.email, phone_number: input.phone_number }.compact
+  end
+end
+```
+
+You'll get an `ArgumentError` if you pass any params not defined in the `inputs_for` block, or if you don't supply all required params. This is completely opt-in so if you don't provide an `inputs_for` block, no checking is performed.
 
 ## Development
 
