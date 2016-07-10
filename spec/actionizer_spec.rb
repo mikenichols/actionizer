@@ -38,15 +38,13 @@ describe Actionizer do
     it "makes passed-in values accessible on 'input'" do
       dummy_class.class_eval do
         def call
-          raise RuntimeError unless input.foo == 'abc'
-          raise RuntimeError unless input.bar == %w(do re mi)
+          raise RuntimeError if input.foo != 'abc'
+          raise RuntimeError if input.bar != %w(do re mi)
         end
       end
 
       dummy_class.call(foo: 'abc', bar: %w(do re mi))
     end
-
-    it 'allows an inputs block to define required and optional params'
   end
 
   context 'output' do
@@ -118,10 +116,29 @@ describe Actionizer do
       end
     end
 
+    context "when the result doesn't respond to :to_h" do
+      let(:non_conforming_class) do
+        Class.new do
+          def self.call
+            'success'
+          end
+
+          def self.name
+            'AnonymousClass'
+          end
+        end
+      end
+
+      it 'raises an ArgumentError' do
+        expect { dummy_class.new.call_or_fail(non_conforming_class) }
+          .to raise_error(ArgumentError, "AnonymousClass#call's result must respond to :to_h")
+      end
+    end
+
     context "when the result doesn't respond to :failure?" do
       let(:non_conforming_class) do
         Class.new do
-          def self.call(_params, _arg2)
+          def self.call
             { success: true }
           end
 
@@ -132,7 +149,7 @@ describe Actionizer do
       end
 
       it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(non_conforming_class, 1, 2) }
+        expect { dummy_class.new.call_or_fail(non_conforming_class) }
           .to raise_error(ArgumentError, "AnonymousClass#call's result must respond to :failure?")
       end
     end
@@ -140,14 +157,14 @@ describe Actionizer do
     context 'when the method returns nil' do
       let(:non_conforming_class) do
         Class.new do
-          def self.call(_params, _arg2)
+          def self.call
             nil
           end
         end
       end
 
       it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(non_conforming_class, 1, 2) }
+        expect { dummy_class.new.call_or_fail(non_conforming_class) }
           .to raise_error(ArgumentError)
       end
     end

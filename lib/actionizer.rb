@@ -2,6 +2,7 @@ require 'ostruct'
 require 'actionizer/result'
 require 'actionizer/failure'
 require 'actionizer/version'
+require 'actionizer/inputs'
 
 module Actionizer
   attr_reader :input, :output
@@ -15,6 +16,9 @@ module Actionizer
       instance = new(*args)
 
       if instance.respond_to?(method_name)
+        error = defined_inputs.check_for_param_error(method_name, *args)
+        raise ArgumentError, error if error
+
         instance.tap(&method_name).output
       else
         super
@@ -25,6 +29,32 @@ module Actionizer
 
     def respond_to_missing?(method_name, include_private = false)
       new.respond_to?(method_name, include_private)
+    end
+
+    def defined_inputs
+      @defined_inputs ||= Actionizer::Inputs.new
+    end
+
+    def inputs_for(method)
+      raise ArgumentError, 'inputs_for requires a block' if !block_given?
+
+      defined_inputs.start(method)
+      yield
+      defined_inputs.end
+
+      raise 'You must define at least one optional or required param' if defined_inputs.no_params_declared?(method)
+    end
+
+    def optional(param)
+      raise 'You must call optional from inside an inputs_for block' if defined_inputs.outside_inputs_for_block?
+
+      defined_inputs.add(param: param, required: false)
+    end
+
+    def required(param)
+      raise 'You must call required from inside an inputs_for block' if defined_inputs.outside_inputs_for_block?
+
+      defined_inputs.add(param: param, required: true)
     end
   end
 
@@ -43,23 +73,20 @@ module Actionizer
 
   # Allows you to call *_or_fail
   def method_missing(method_name, *args, &block)
-    return super unless method_name.to_s.end_with?('_or_fail')
+    return super if !method_name.to_s.end_with?('_or_fail')
 
     action_class, *params = args
     underlying_method = method_name.to_s.chomp('_or_fail')
 
-    unless action_class.respond_to?(underlying_method)
+    if !action_class.respond_to?(underlying_method)
       raise ArgumentError, "#{action_class.name} must define ##{underlying_method}"
     end
 
     result = action_class.send(underlying_method, *params)
 
-    unless result.respond_to?(:failure?)
-      raise ArgumentError, "#{action_class.name}##{underlying_method}'s result must respond to :failure?"
-    end
+    verify_result_is_conforming!(result, "#{action_class.name}##{underlying_method}")
 
-    errors = result.to_h.select { |k, _v| k.to_s.start_with? 'error' }
-    errors[:error] = "Unknown: Your result doesn't respond to a method beginning with 'error'" unless errors.any?
+    errors = result.to_h.select { |key, _value| key.to_s.start_with?('error') }
     fail!(errors) if result.failure?
 
     result
@@ -67,5 +94,13 @@ module Actionizer
 
   def respond_to_missing?(method_name, _include_private = false)
     method_name.to_s.end_with?('_or_fail')
+  end
+
+  private
+
+  def verify_result_is_conforming!(result, class_and_method)
+    raise ArgumentError, "#{class_and_method}'s result must respond to :to_h" if !result.respond_to?(:to_h)
+
+    raise ArgumentError, "#{class_and_method}'s result must respond to :failure?" if !result.respond_to?(:failure?)
   end
 end

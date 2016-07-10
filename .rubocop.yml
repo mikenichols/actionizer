@@ -1,5 +1,5 @@
 Metrics/AbcSize:
-  Max: 20
+  Max: 25
 Metrics/LineLength:
   Max: 120
 Metrics/MethodLength:
@@ -11,7 +11,11 @@ Style/EmptyLinesAroundBlockBody:
   Enabled: false
 Style/EmptyLinesAroundClassBody:
   Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
 Style/MutableConstant:
+  Enabled: false
+Style/NegatedIf:
   Enabled: false
 Style/TrivialAccessors:
   Enabled: false
