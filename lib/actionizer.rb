@@ -2,6 +2,7 @@ require 'ostruct'
 require 'actionizer/result'
 require 'actionizer/failure'
 require 'actionizer/version'
+require 'actionizer/inputs'
 
 module Actionizer
   attr_reader :input, :output
@@ -27,21 +28,30 @@ module Actionizer
       new.respond_to?(method_name, include_private)
     end
 
+    def defined_inputs
+      @defined_inputs ||= Actionizer::Inputs.new
+    end
+
     def inputs_for(method)
       raise ArgumentError, 'inputs_for requires a block' unless block_given?
-      raise "#{name} must respond to #{method}" unless respond_to?(method)
 
-      @inputs_for_method = method
+      defined_inputs.start(method)
       yield
-      @inputs_for_method = nil
+      defined_inputs.end
+
+      raise 'You must defined at least one optional or required param' if defined_inputs.no_params_declared?(method)
     end
 
-    def optional(_variable_name)
-      raise 'You must call optional from inside an inputs_for block' if @inputs_for_method.nil?
+    def optional(param)
+      raise 'You must call optional from inside an inputs_for block' if defined_inputs.outside_inputs_for_block?
+
+      defined_inputs.add(param: param, required: false)
     end
 
-    def required(_variable_name)
-      raise 'You must call required from inside an inputs_for block' if @inputs_for_method.nil?
+    def required(param)
+      raise 'You must call required from inside an inputs_for block' if defined_inputs.outside_inputs_for_block?
+
+      defined_inputs.add(param: param, required: true)
     end
   end
 
