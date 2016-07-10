@@ -36,13 +36,13 @@ module Actionizer
     end
 
     def inputs_for(method)
-      raise ArgumentError, 'inputs_for requires a block' unless block_given?
+      raise ArgumentError, 'inputs_for requires a block' if !block_given?
 
       defined_inputs.start(method)
       yield
       defined_inputs.end
 
-      raise 'You must defined at least one optional or required param' if defined_inputs.no_params_declared?(method)
+      raise 'You must define at least one optional or required param' if defined_inputs.no_params_declared?(method)
     end
 
     def optional(param)
@@ -73,23 +73,23 @@ module Actionizer
 
   # Allows you to call *_or_fail
   def method_missing(method_name, *args, &block)
-    return super unless method_name.to_s.end_with?('_or_fail')
+    return super if !method_name.to_s.end_with?('_or_fail')
 
     action_class, *params = args
     underlying_method = method_name.to_s.chomp('_or_fail')
 
-    unless action_class.respond_to?(underlying_method)
+    if !action_class.respond_to?(underlying_method)
       raise ArgumentError, "#{action_class.name} must define ##{underlying_method}"
     end
 
     result = action_class.send(underlying_method, *params)
 
-    unless result.respond_to?(:failure?)
+    if !result.respond_to?(:failure?)
       raise ArgumentError, "#{action_class.name}##{underlying_method}'s result must respond to :failure?"
     end
 
     errors = result.to_h.select { |k, _v| k.to_s.start_with? 'error' }
-    errors[:error] = "Unknown: Your result doesn't respond to a method beginning with 'error'" unless errors.any?
+    errors[:error] = "Unknown: Your result doesn't respond to a method beginning with 'error'" if errors.empty?
     fail!(errors) if result.failure?
 
     result

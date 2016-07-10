@@ -38,8 +38,8 @@ describe Actionizer do
     it "makes passed-in values accessible on 'input'" do
       dummy_class.class_eval do
         def call
-          raise RuntimeError unless input.foo == 'abc'
-          raise RuntimeError unless input.bar == %w(do re mi)
+          raise RuntimeError if input.foo != 'abc'
+          raise RuntimeError if input.bar != %w(do re mi)
         end
       end
 
