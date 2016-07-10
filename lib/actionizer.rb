@@ -26,6 +26,23 @@ module Actionizer
     def respond_to_missing?(method_name, include_private = false)
       new.respond_to?(method_name, include_private)
     end
+
+    def inputs_for(method)
+      raise ArgumentError, 'inputs_for requires a block' unless block_given?
+      raise "#{name} must respond to #{method}" unless respond_to?(method)
+
+      @inputs_for_method = method
+      yield
+      @inputs_for_method = nil
+    end
+
+    def optional(_variable_name)
+      raise 'You must call optional from inside an inputs_for block' if @inputs_for_method.nil?
+    end
+
+    def required(_variable_name)
+      raise 'You must call required from inside an inputs_for block' if @inputs_for_method.nil?
+    end
   end
 
   def initialize(initial_input = {})

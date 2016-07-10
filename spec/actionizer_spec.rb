@@ -45,14 +45,67 @@ describe Actionizer do
 
       dummy_class.call(foo: 'abc', bar: %w(do re mi))
     end
-
-    it 'allows an inputs block to define required and optional params'
   end
 
   context 'output' do
     it 'is an Actionizer::Result' do
       result = dummy_class.call
       expect(result).to be_an(Actionizer::Result)
+    end
+  end
+
+  describe 'inputs_for' do
+    context 'when you use .optional outside of an inputs_for block' do
+      let(:failing_class) do
+        Class.new do
+          include Actionizer
+          optional :foo
+          def call; end
+        end
+      end
+      it 'raises an error' do
+        expect { failing_class.call }.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'when you use .required outside of an inputs_for block' do
+      let(:failing_class) do
+        Class.new do
+          include Actionizer
+          required :foo
+          def call; end
+        end
+      end
+      it 'raises an error' do
+        expect { failing_class.call }.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'when you define inputs for a non-existent method' do
+      let(:failing_class) do
+        Class.new do
+          include Actionizer
+          inputs_for :non_existent_method do
+            optional :foo
+          end
+          def call; end
+        end
+      end
+      it 'raises an error' do
+        expect { failing_class.call }.to raise_error(RuntimeError)
+      end
+    end
+
+    context 'when there are no inputs defined' do
+      it 'raises an error'
+    end
+
+    context 'when called with arguments not specified in inputs_for' do
+      it 'raises an error'
+    end
+
+    context 'when not called with all required arguments' do
+      it 'raises an error'
     end
   end
 
