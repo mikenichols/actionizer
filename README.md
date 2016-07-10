@@ -54,6 +54,23 @@ result.failure?
 #=> false
 ```
 
+You can simplify your controllers drastically having them simply check for `success?`
+```ruby
+class UserController < ApplicationController
+
+  def create
+    result = CreateUser.call(name: params.fetch(:name), email: params.fetch(:email))
+
+    if result.success?
+      render :dashboard, user: result.user
+    else
+      redirect_to :new, error: "Couldn't create user because #{result.error_reason}"
+    end
+  end
+
+end
+```
+
 ### Signal failure with `fail!`
 
 You can immediately stop execution with the `fail!` method.
