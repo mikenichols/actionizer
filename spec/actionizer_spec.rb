@@ -34,6 +34,19 @@ describe Actionizer do
     end
   end
 
+  context 'when an instance method called "call" is defined on a class' do
+    let(:class_with_call) do
+      Class.new do
+        include Actionizer
+        def call; end
+      end
+    end
+    it 'will be invoked when the class is converterd to a proc (use of unary &) and then called' do
+      expect_any_instance_of(class_with_call).to receive(:call)
+      [1].map(&class_with_call)
+    end
+  end
+
   context 'input' do
     it "makes passed-in values accessible on 'input'" do
       dummy_class.class_eval do
