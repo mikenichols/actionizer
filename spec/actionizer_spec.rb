@@ -34,16 +34,36 @@ describe Actionizer do
     end
   end
 
-  context 'when an instance method called "call" is defined on a class' do
-    let(:class_with_call) do
-      Class.new do
-        include Actionizer
-        def call; end
+  context 'invoking as a proc' do
+    context 'When instance method "call" is not defined on a class' do
+      let(:class_without_call) do
+        Class.new do
+          include Actionizer
+        end
+      end
+      it 'will raise NoMethodError' do
+        expect { class_without_call.to_proc }.to raise_error(NoMethodError)
+        expect { [{named_arg: 1}].map(&class_without_call) }.to raise_error(NoMethodError)
       end
     end
-    it 'will be invoked when the class is converterd to a proc (use of unary &) and then called' do
-      expect_any_instance_of(class_with_call).to receive(:call)
-      [1].map(&class_with_call)
+
+    context 'when instance method "call" is defined on a class' do
+      let(:class_with_call) do
+        Class.new do
+          include Actionizer
+          def call; output.was_called = true end
+        end
+      end
+      it 'will be invoked when to_proc is called on the class and the proc is then called' do
+        expect_any_instance_of(class_with_call).to receive(:call).and_call_original
+        proc = class_with_call.to_proc
+        output = proc.call
+        expect(output.was_called).to be true
+      end
+      it 'will be invoked when the class is converted to a proc (use of unary &) and then called' do
+        expect_any_instance_of(class_with_call).to receive(:call)
+        [{named_arg: 1}].map(&class_with_call)
+      end
     end
   end
 
