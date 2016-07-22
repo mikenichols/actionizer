@@ -14,9 +14,8 @@ module Actionizer
   module ClassMethods
     def to_proc
       if new.respond_to?(:call)
-        k = self
         Proc.new { |input|
-          k.new(input).call
+          self.new(input).call
         }
       else
         raise NoMethodError, 'If you want an Actionized class to act like a proc, define a `call` method'
