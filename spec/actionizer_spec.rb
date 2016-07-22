@@ -52,19 +52,20 @@ describe Actionizer do
         Class.new do
           include Actionizer
           def call
-            output.was_called = true
+            output.was_called    = true
+            output.input_arg_was = input && input.named_arg
+            output
           end
         end
       end
       it 'will be invoked when to_proc is called on the class and the proc is then called' do
-        expect_any_instance_of(class_with_call).to receive(:call).and_call_original
         proc = class_with_call.to_proc
-        output = proc.call
-        expect(output.was_called).to be true
+        result = proc.call {}
+        expect(result.was_called).to be true
       end
-      it 'will be invoked when the class is converted to a proc (use of unary &) and then called' do
-        expect_any_instance_of(class_with_call).to receive(:call)
-        [{ named_arg: 1 }].map(&class_with_call)
+      it 'will be invoked when the class is converted to a proc and passes args and then called' do
+        arr = [{ named_arg: 1 }].map(&class_with_call)
+        expect(arr.first.input_arg_was).to eq 1
       end
     end
   end
