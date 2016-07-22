@@ -43,7 +43,7 @@ describe Actionizer do
       end
       it 'will raise NoMethodError' do
         expect { class_without_call.to_proc }.to raise_error(NoMethodError)
-        expect { [{named_arg: 1}].map(&class_without_call) }.to raise_error(NoMethodError)
+        expect { [{ named_arg: 1 }].map(&class_without_call) }.to raise_error(NoMethodError)
       end
     end
 
@@ -51,7 +51,9 @@ describe Actionizer do
       let(:class_with_call) do
         Class.new do
           include Actionizer
-          def call; output.was_called = true end
+          def call
+            output.was_called = true
+          end
         end
       end
       it 'will be invoked when to_proc is called on the class and the proc is then called' do
@@ -62,7 +64,7 @@ describe Actionizer do
       end
       it 'will be invoked when the class is converted to a proc (use of unary &) and then called' do
         expect_any_instance_of(class_with_call).to receive(:call)
-        [{named_arg: 1}].map(&class_with_call)
+        [{ named_arg: 1 }].map(&class_with_call)
       end
     end
   end

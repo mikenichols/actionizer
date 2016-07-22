@@ -12,12 +12,11 @@ module Actionizer
   end
 
   module ClassMethods
-
     def to_proc
       if new.respond_to?(:call)
-        self.method(:call).curry
+        method(:call).curry
       else
-        raise NoMethodError, "If you want an Actionized class to act like a proc, define a `call` method"
+        raise NoMethodError, 'If you want an Actionized class to act like a proc, define a `call` method'
       end
     end
 
