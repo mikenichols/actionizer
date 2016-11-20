@@ -1,3 +1,6 @@
+Lint/InheritException:
+  Enabled: false
+
 Metrics/AbcSize:
   Max: 25
 Metrics/LineLength:
@@ -16,6 +19,4 @@ Style/FrozenStringLiteralComment:
 Style/MutableConstant:
   Enabled: false
 Style/NegatedIf:
-  Enabled: false
-Style/TrivialAccessors:
   Enabled: false
