@@ -1,5 +1,5 @@
 module Actionizer
-  class Failure < StandardError
+  class Failure < Exception
     attr_reader :output
 
     def initialize(msg, output)
