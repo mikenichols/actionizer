@@ -32,8 +32,10 @@ module Actionizer
       @method = nil
     end
 
-    def add(args)
-      @declared_params_by_method[method][args.fetch(:param)] = { required: args.fetch(:required) }
+    def add(param:, required:, opts:)
+      @declared_params_by_method[method][param] = { required: required,
+                                                    null: opts.fetch(:null, true),
+                                                    type: opts.fetch(:type, nil) }
     end
 
     def no_params_declared?(method)
