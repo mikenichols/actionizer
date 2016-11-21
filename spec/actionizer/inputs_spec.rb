@@ -104,5 +104,128 @@ describe Actionizer do
         succeeding_class.call(foo: 'present', qux: 'here')
       end
     end
+
+    describe 'null option' do
+      context 'when not specified' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :arg
+            end
+            def call; end
+          end
+        end
+
+        context 'and nil is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: nil)).to be_success
+          end
+        end
+
+        context 'and not nil is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: 'not-nil')).to be_success
+          end
+        end
+      end
+
+      context 'when null is specified as true' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :arg, null: true
+            end
+            def call; end
+          end
+        end
+
+        context 'and nil is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: nil)).to be_success
+          end
+        end
+
+        context 'and not nil is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: 'not-nil')).to be_success
+          end
+        end
+      end
+
+      context 'when null is specified as false' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :arg, null: false
+            end
+            def call; end
+          end
+        end
+
+        context 'and nil is passed' do
+          it 'fails' do
+            expect { dummy_class.call(arg: nil) }.to raise_error(ArgumentError)
+          end
+        end
+
+        context 'and not nil is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: 'not-nil')).to be_success
+          end
+        end
+      end
+    end
+
+    describe 'type option' do
+      context 'when no type is specified' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :arg
+            end
+            def call; end
+          end
+        end
+
+        it 'allows any type' do
+          expect(dummy_class.call(arg: :any_type_at_all)).to be_success
+        end
+      end
+
+      context 'when a type is specified' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :arg, type: Numeric
+            end
+            def call; end
+          end
+        end
+
+        context 'and that exact type is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: 1)).to be_success
+          end
+        end
+
+        context 'and a subclass of that type is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call(arg: 1.1)).to be_success
+          end
+        end
+
+        context 'and a type other than a subclass is passed' do
+          it 'fails' do
+            expect { dummy_class.call(arg: '1') }.to raise_error(ArgumentError)
+          end
+        end
+      end
+    end
+
   end
 end
