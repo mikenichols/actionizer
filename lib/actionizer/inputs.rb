@@ -38,6 +38,14 @@ module Actionizer
     end
 
     def add(param:, required:, opts:)
+      if ![nil, true, false].include?(opts[:null])
+        raise ArgumentError, 'Please specify either true or false for a null option'
+      end
+
+      if opts[:type] && opts[:type].class != Class
+        raise ArgumentError, "Please specify a class for type: (#{opts[:type]} is not a class)"
+      end
+
       @declared_params_by_method[method][param] = { required: required,
                                                     null: false == opts[:null] ? false : true,
                                                     type: opts.fetch(:type, nil) }

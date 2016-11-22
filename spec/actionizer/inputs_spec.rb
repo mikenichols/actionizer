@@ -177,6 +177,22 @@ describe Actionizer do
           end
         end
       end
+
+      context 'when null is specified as something other than true or false' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :arg, null: 'not-true-or-false'
+            end
+            def call; end
+          end
+        end
+
+        it 'raises an ArgumentError' do
+          expect { dummy_class.call(arg: 'whatever') }.to raise_error(ArgumentError)
+        end
+      end
     end
 
     describe 'type option' do
@@ -222,6 +238,22 @@ describe Actionizer do
         context 'and a type other than a subclass is passed' do
           it 'fails' do
             expect { dummy_class.call(arg: '1') }.to raise_error(ArgumentError)
+          end
+        end
+
+        context 'and that thing is not a class' do
+          let(:dummy_class) do
+            Class.new do
+              include Actionizer
+              inputs_for(:call) do
+                optional :arg, type: 'not-a-class'
+              end
+              def call; end
+            end
+          end
+
+          it 'raises an ArgumentError' do
+            expect { dummy_class.call(arg: 'whatever') }.to raise_error(ArgumentError)
           end
         end
       end
