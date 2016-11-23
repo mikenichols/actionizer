@@ -12,6 +12,16 @@ module Actionizer
   end
 
   module ClassMethods
+    def to_proc
+      if new.respond_to?(:call)
+        proc do |input|
+          new(input).call
+        end
+      else
+        raise NoMethodError, 'If you want an Actionized class to act like a proc, define a `call` method'
+      end
+    end
+
     def method_missing(method_name, *args, &block)
       instance = new(*args)
 

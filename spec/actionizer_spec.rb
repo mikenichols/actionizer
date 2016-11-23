@@ -34,6 +34,42 @@ describe Actionizer do
     end
   end
 
+  context 'invoking as a proc' do
+    context 'When instance method "call" is not defined on a class' do
+      let(:class_without_call) do
+        Class.new do
+          include Actionizer
+        end
+      end
+      it 'will raise NoMethodError' do
+        expect { class_without_call.to_proc }.to raise_error(NoMethodError)
+        expect { [{ named_arg: 1 }].map(&class_without_call) }.to raise_error(NoMethodError)
+      end
+    end
+
+    context 'when instance method "call" is defined on a class' do
+      let(:class_with_call) do
+        Class.new do
+          include Actionizer
+          def call
+            output.was_called    = true
+            output.input_arg_was = input && input.named_arg
+            output
+          end
+        end
+      end
+      it 'will be invoked when to_proc is called on the class and the proc is then called' do
+        proc = class_with_call.to_proc
+        result = proc.call {}
+        expect(result.was_called).to be true
+      end
+      it 'will be invoked when the class is converted to a proc and passes args and then called' do
+        arr = [{ named_arg: 1 }].map(&class_with_call)
+        expect(arr.first.input_arg_was).to eq 1
+      end
+    end
+  end
+
   context 'input' do
     it "makes passed-in values accessible on 'input'" do
       dummy_class.class_eval do
