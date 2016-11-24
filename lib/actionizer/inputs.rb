@@ -15,6 +15,11 @@ module Actionizer
       end
 
       declared_params_by_method.fetch(method_name, {}).each_pair do |param, attrs|
+        return "Param #{param} can't be nil" if !attrs.fetch(:null) && params[param].nil?
+
+        type = attrs.fetch(:type)
+        return "Param #{param} must descend from #{type}" if type && !(params[param].class <= type)
+
         next if !attrs.fetch(:required)
 
         return "Param #{param} is required for #{method_name}" if !params.include?(param)
@@ -32,8 +37,18 @@ module Actionizer
       @method = nil
     end
 
-    def add(args)
-      @declared_params_by_method[method][args.fetch(:param)] = { required: args.fetch(:required) }
+    def add(param:, required:, opts:)
+      if ![nil, true, false].include?(opts[:null])
+        raise ArgumentError, 'Please specify either true or false for a null option'
+      end
+
+      if opts[:type] && opts[:type].class != Class
+        raise ArgumentError, "Please specify a class for type: (#{opts[:type]} is not a class)"
+      end
+
+      @declared_params_by_method[method][param] = { required: required,
+                                                    null: false == opts[:null] ? false : true,
+                                                    type: opts.fetch(:type, nil) }
     end
 
     def no_params_declared?(method)

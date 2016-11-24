@@ -45,16 +45,22 @@ module Actionizer
       raise 'You must define at least one optional or required param' if defined_inputs.no_params_declared?(method)
     end
 
-    def optional(param)
-      raise 'You must call optional from inside an inputs_for block' if defined_inputs.outside_inputs_for_block?
-
-      defined_inputs.add(param: param, required: false)
+    def optional(param, opts = {})
+      define_input_param(false, param, opts)
     end
 
-    def required(param)
-      raise 'You must call required from inside an inputs_for block' if defined_inputs.outside_inputs_for_block?
+    def required(param, opts = {})
+      define_input_param(true, param, opts)
+    end
 
-      defined_inputs.add(param: param, required: true)
+    private
+
+    def define_input_param(required, param, opts)
+      if defined_inputs.outside_inputs_for_block?
+        raise "You must call #{required ? 'required' : 'optional'} from inside an inputs_for block"
+      end
+
+      defined_inputs.add(param: param, required: required, opts: opts)
     end
   end
 

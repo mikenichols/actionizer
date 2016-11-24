@@ -32,6 +32,11 @@ describe Actionizer do
     it "doesn't allow you to call undefined methods" do
       expect { class_with_execute.not_defined }.to raise_error(NoMethodError)
     end
+
+    it 'is successful by default' do
+      result = class_with_execute.execute
+      expect(result).to be_success
+    end
   end
 
   context 'input' do
