@@ -51,8 +51,10 @@ describe Actionizer do
           def call; end
         end
       end
-      it 'raises an error' do
-        expect { failing_class.call(bar: 'oops') }.to raise_error(ArgumentError)
+      it 'fails gracefully and sets the error message' do
+        result = failing_class.call(bar: 'oops')
+        expect(result).to be_failure
+        expect(result.error).not_to be_nil
       end
     end
 
@@ -67,8 +69,10 @@ describe Actionizer do
           def call; end
         end
       end
-      it 'raises an error' do
-        expect { failing_class.call(foo: 'present') }.to raise_error(ArgumentError)
+      it 'fails gracefully and sets the error message' do
+        result = failing_class.call(foo: 'present')
+        expect(result).to be_failure
+        expect(result.error).not_to be_nil
       end
     end
 
@@ -166,8 +170,10 @@ describe Actionizer do
         end
 
         context 'and nil is passed' do
-          it 'fails' do
-            expect { dummy_class.call(arg: nil) }.to raise_error(ArgumentError)
+          it 'fails gracefully and sets the error message' do
+            result = dummy_class.call(arg: nil)
+            expect(result).to be_failure
+            expect(result.error).not_to be_nil
           end
         end
 
@@ -236,8 +242,10 @@ describe Actionizer do
         end
 
         context 'and a type other than a subclass is passed' do
-          it 'fails' do
-            expect { dummy_class.call(arg: '1') }.to raise_error(ArgumentError)
+          it 'fails gracefully and sets the error message' do
+            result = dummy_class.call(arg: '1')
+            expect(result).to be_failure
+            expect(result.error).not_to be_nil
           end
         end
 

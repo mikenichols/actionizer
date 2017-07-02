@@ -14,11 +14,14 @@ Metrics/MethodLength:
 
 Style/Documentation:
   Enabled: false
+
 Style/EmptyLinesAroundBlockBody:
   Enabled: false
 Style/EmptyLinesAroundClassBody:
   Enabled: false
 Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/IfUnlessModifier:
   Enabled: false
 Style/MutableConstant:
   Enabled: false
