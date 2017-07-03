@@ -17,7 +17,9 @@ module Actionizer
 
       if instance.respond_to?(method_name)
         error = defined_inputs.check_for_param_error(method_name, *args)
-        raise ArgumentError, error if error
+        if error
+          return Actionizer::Result.new(error: error).tap(&:fail)
+        end
 
         instance.tap(&method_name).output
       else

@@ -139,7 +139,7 @@ To more explicitly document the inputs to your Actions, you can use `inputs_for`
 class CreateUser
   include Actionizer
 
-  inputs_for :call do
+  inputs_for(:call) do
     required :name
     required :email
     optional :phone_number
@@ -156,7 +156,27 @@ class CreateUser
 end
 ```
 
-You'll get an `ArgumentError` if you pass any params not defined in the `inputs_for` block, or if you don't supply all required params. This is completely opt-in so if you don't provide an `inputs_for` block, no checking is performed.
+### Specifying types and nullable fields
+
+You can now also optionally specify types and nullability for your inputs. For the `type:` option, any ruby class can be used.
+
+```ruby
+inputs_for(:call) do
+  required :name, type: String, null: false
+  required :email, null: false
+  optional :phone_number, type: Integer
+end
+```
+
+### `inputs_for` error handling
+
+The action will fail immediately if any of the conditions are met:
+- Any required param is not passed
+- A param is passed that is not declared
+- `nil` is passed for a param marked `null: false` (default is `null: true`)
+- The class of the argument is not equal to or a subclass of the specified type
+
+Using an `inputs_for` block is completely opt-in so if you don't provide it, no checking is performed.
 
 ## Development
 

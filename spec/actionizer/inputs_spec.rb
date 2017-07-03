@@ -10,6 +10,7 @@ describe Actionizer do
           def call; end
         end
       end
+
       it 'raises an error' do
         expect { failing_class.call }.to raise_error(RuntimeError)
       end
@@ -23,6 +24,7 @@ describe Actionizer do
           def call; end
         end
       end
+
       it 'raises an error' do
         expect { failing_class.call }.to raise_error(RuntimeError)
       end
@@ -36,6 +38,7 @@ describe Actionizer do
           def call; end
         end
       end
+
       it 'raises an error' do
         expect { failing_class.call }.to raise_error(RuntimeError)
       end
@@ -51,8 +54,11 @@ describe Actionizer do
           def call; end
         end
       end
-      it 'raises an error' do
-        expect { failing_class.call(bar: 'oops') }.to raise_error(ArgumentError)
+
+      it 'fails gracefully and sets the error message' do
+        result = failing_class.call(bar: 'oops')
+        expect(result).to be_failure
+        expect(result.error).to eq('Param bar not declared')
       end
     end
 
@@ -67,8 +73,11 @@ describe Actionizer do
           def call; end
         end
       end
-      it 'raises an error' do
-        expect { failing_class.call(foo: 'present') }.to raise_error(ArgumentError)
+
+      it 'fails gracefully and sets the error message' do
+        result = failing_class.call(foo: 'present')
+        expect(result).to be_failure
+        expect(result.error).to eq('Param bar is required for call')
       end
     end
 
@@ -83,8 +92,10 @@ describe Actionizer do
           def call; end
         end
       end
+
       it 'succeeds' do
-        succeeding_class.call(foo: 'present', bar: 'also present')
+        result = succeeding_class.call(foo: 'present', bar: 'also present')
+        expect(result).to be_success
       end
     end
 
@@ -100,8 +111,10 @@ describe Actionizer do
           def call; end
         end
       end
+
       it 'succeeds' do
-        succeeding_class.call(foo: 'present', qux: 'here')
+        result = succeeding_class.call(foo: 'present', qux: 'here')
+        expect(result).to be_success
       end
     end
 
@@ -111,7 +124,7 @@ describe Actionizer do
           Class.new do
             include Actionizer
             inputs_for(:call) do
-              optional :arg
+              optional :foo
             end
             def call; end
           end
@@ -119,13 +132,13 @@ describe Actionizer do
 
         context 'and nil is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: nil)).to be_success
+            expect(dummy_class.call(foo: nil)).to be_success
           end
         end
 
         context 'and not nil is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: 'not-nil')).to be_success
+            expect(dummy_class.call(foo: 'not-nil')).to be_success
           end
         end
       end
@@ -135,7 +148,7 @@ describe Actionizer do
           Class.new do
             include Actionizer
             inputs_for(:call) do
-              optional :arg, null: true
+              optional :foo, null: true
             end
             def call; end
           end
@@ -143,13 +156,13 @@ describe Actionizer do
 
         context 'and nil is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: nil)).to be_success
+            expect(dummy_class.call(foo: nil)).to be_success
           end
         end
 
         context 'and not nil is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: 'not-nil')).to be_success
+            expect(dummy_class.call(foo: 'not-nil')).to be_success
           end
         end
       end
@@ -159,21 +172,23 @@ describe Actionizer do
           Class.new do
             include Actionizer
             inputs_for(:call) do
-              optional :arg, null: false
+              optional :foo, null: false
             end
             def call; end
           end
         end
 
         context 'and nil is passed' do
-          it 'fails' do
-            expect { dummy_class.call(arg: nil) }.to raise_error(ArgumentError)
+          it 'fails gracefully and sets the error message' do
+            result = dummy_class.call(foo: nil)
+            expect(result).to be_failure
+            expect(result.error).to eq("Param foo can't be nil")
           end
         end
 
         context 'and not nil is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: 'not-nil')).to be_success
+            expect(dummy_class.call(foo: 'not-nil')).to be_success
           end
         end
       end
@@ -183,14 +198,14 @@ describe Actionizer do
           Class.new do
             include Actionizer
             inputs_for(:call) do
-              optional :arg, null: 'not-true-or-false'
+              optional :foo, null: 'not-true-or-false'
             end
             def call; end
           end
         end
 
         it 'raises an ArgumentError' do
-          expect { dummy_class.call(arg: 'whatever') }.to raise_error(ArgumentError)
+          expect { dummy_class.call(foo: 'whatever') }.to raise_error(ArgumentError)
         end
       end
     end
@@ -201,14 +216,14 @@ describe Actionizer do
           Class.new do
             include Actionizer
             inputs_for(:call) do
-              optional :arg
+              optional :foo
             end
             def call; end
           end
         end
 
         it 'allows any type' do
-          expect(dummy_class.call(arg: :any_type_at_all)).to be_success
+          expect(dummy_class.call(foo: :any_type_at_all)).to be_success
         end
       end
 
@@ -217,7 +232,7 @@ describe Actionizer do
           Class.new do
             include Actionizer
             inputs_for(:call) do
-              optional :arg, type: Numeric
+              optional :foo, type: Numeric
             end
             def call; end
           end
@@ -225,19 +240,29 @@ describe Actionizer do
 
         context 'and that exact type is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: 1)).to be_success
+            expect(dummy_class.call(foo: 1)).to be_success
           end
         end
 
         context 'and a subclass of that type is passed' do
           it 'succeeds' do
-            expect(dummy_class.call(arg: 1.1)).to be_success
+            expect(dummy_class.call(foo: 1.1)).to be_success
           end
         end
 
         context 'and a type other than a subclass is passed' do
-          it 'fails' do
-            expect { dummy_class.call(arg: '1') }.to raise_error(ArgumentError)
+          it 'fails gracefully and sets the error message' do
+            result = dummy_class.call(foo: '1')
+            expect(result).to be_failure
+            expect(result.error).to eq('Param foo must descend from Numeric')
+          end
+        end
+
+        context 'and nil is passed' do
+          it 'fails because of the type check, not because of the nil check' do
+            result = dummy_class.call(foo: nil)
+            expect(result).to be_failure
+            expect(result.error).to eq('Param foo must descend from Numeric')
           end
         end
 
@@ -246,14 +271,14 @@ describe Actionizer do
             Class.new do
               include Actionizer
               inputs_for(:call) do
-                optional :arg, type: 'not-a-class'
+                optional :foo, type: 'not-a-class'
               end
               def call; end
             end
           end
 
           it 'raises an ArgumentError' do
-            expect { dummy_class.call(arg: 'whatever') }.to raise_error(ArgumentError)
+            expect { dummy_class.call(foo: 'whatever') }.to raise_error(ArgumentError)
           end
         end
       end
