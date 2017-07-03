@@ -258,6 +258,14 @@ describe Actionizer do
           end
         end
 
+        context 'and nil is passed' do
+          it 'fails because of the type check, not because of the nil check' do
+            result = dummy_class.call(foo: nil)
+            expect(result).to be_failure
+            expect(result.error).to eq('Param foo must descend from Numeric')
+          end
+        end
+
         context 'and that thing is not a class' do
           let(:dummy_class) do
             Class.new do
