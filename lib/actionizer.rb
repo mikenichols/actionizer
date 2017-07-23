@@ -6,6 +6,7 @@ require 'actionizer/inputs'
 
 module Actionizer
   attr_reader :input, :output
+  attr_accessor :raise_on_failure
 
   def self.included(base)
     base.extend(ClassMethods)
@@ -15,10 +16,15 @@ module Actionizer
     def method_missing(method_name, *args, &block)
       instance = new(*args)
 
+      if method_name.to_s.end_with?('!')
+        method_name = method_name.to_s.chomp('!').to_sym
+        instance.raise_on_failure = true
+      end
+
       if instance.respond_to?(method_name)
         error = defined_inputs.check_for_param_error(method_name, *args)
         if error
-          return Actionizer::Result.new(error: error).tap(&:fail)
+          raise Actionizer::Failure.new('Failed.', Actionizer::Result.new(error: error).tap(&:fail))
         end
 
         instance.tap(&method_name).output
@@ -26,6 +32,10 @@ module Actionizer
         super
       end
     rescue Actionizer::Failure => af
+      if instance.raise_on_failure
+        raise af
+      end
+
       af.output
     end
 
@@ -69,6 +79,7 @@ module Actionizer
   def initialize(initial_input = {})
     @input = OpenStruct.new(initial_input)
     @output = Actionizer::Result.new
+    @raise_on_failure = false
   end
 
   def fail!(params = {})
@@ -77,38 +88,5 @@ module Actionizer
     output.fail
 
     raise Actionizer::Failure.new('Failed!', output)
-  end
-
-  # Allows you to call *_or_fail
-  def method_missing(method_name, *args, &block)
-    return super if !method_name.to_s.end_with?('_or_fail')
-
-    action_class, *params = args
-    underlying_method = method_name.to_s.chomp('_or_fail')
-
-    if !action_class.respond_to?(underlying_method)
-      raise ArgumentError, "#{action_class.name} must define ##{underlying_method}"
-    end
-
-    result = action_class.send(underlying_method, *params)
-
-    verify_result_is_conforming!(result, "#{action_class.name}##{underlying_method}")
-
-    errors = result.to_h.select { |key, _value| key.to_s.start_with?('error') }
-    fail!(errors) if result.failure?
-
-    result
-  end
-
-  def respond_to_missing?(method_name, _include_private = false)
-    method_name.to_s.end_with?('_or_fail')
-  end
-
-  private
-
-  def verify_result_is_conforming!(result, class_and_method)
-    raise ArgumentError, "#{class_and_method}'s result must respond to :to_h" if !result.respond_to?(:to_h)
-
-    raise ArgumentError, "#{class_and_method}'s result must respond to :failure?" if !result.respond_to?(:failure?)
   end
 end
