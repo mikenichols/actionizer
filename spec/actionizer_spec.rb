@@ -84,7 +84,7 @@ describe Actionizer do
     end
   end
 
-  describe '#*_or_fail' do
+  describe '<METHOD>!' do
     let(:success_action_class) do
       Class.new do
         include Actionizer
@@ -103,91 +103,33 @@ describe Actionizer do
     before do
       dummy_class.class_eval do
         def call
-          call_or_fail(input.first_class, foo: 'bar')
+          input.first_class.call!(foo: 'bar')
           input.second_class.call
         end
       end
     end
 
     it 'returns an Actionizer::Result' do
-      result = dummy_class.new.call_or_fail(success_action_class)
+      result = success_action_class.call!
       expect(result).to be_an(Actionizer::Result)
-    end
-
-    context "when you pass a class that doesn't implement the invoked method" do
-      it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(Object) }
-          .to raise_error(ArgumentError, 'Object must define #call')
-      end
-    end
-
-    context "when the result doesn't respond to :to_h" do
-      let(:non_conforming_class) do
-        Class.new do
-          def self.call
-            'success'
-          end
-
-          def self.name
-            'AnonymousClass'
-          end
-        end
-      end
-
-      it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(non_conforming_class) }
-          .to raise_error(ArgumentError, "AnonymousClass#call's result must respond to :to_h")
-      end
-    end
-
-    context "when the result doesn't respond to :failure?" do
-      let(:non_conforming_class) do
-        Class.new do
-          def self.call
-            { success: true }
-          end
-
-          def self.name
-            'AnonymousClass'
-          end
-        end
-      end
-
-      it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(non_conforming_class) }
-          .to raise_error(ArgumentError, "AnonymousClass#call's result must respond to :failure?")
-      end
-    end
-
-    context 'when the method returns nil' do
-      let(:non_conforming_class) do
-        Class.new do
-          def self.call
-            nil
-          end
-        end
-      end
-
-      it 'raises an ArgumentError' do
-        expect { dummy_class.new.call_or_fail(non_conforming_class) }
-          .to raise_error(ArgumentError)
-      end
     end
 
     context 'when the first action succeeds' do
       it 'proceeds normally and calls both classes' do
-        expect(success_action_class).to receive(:call)
+        expect(success_action_class).to receive(:call!)
           .with(foo: 'bar').once.and_call_original
         expect(failure_action_class).to receive(:call).once
 
-        dummy_class.call(first_class: success_action_class,
-                         second_class: failure_action_class)
+        result = dummy_class.call(first_class: success_action_class,
+                                  second_class: failure_action_class)
+
+        expect(result).to be_success
       end
     end
 
     context 'when the first action fails' do
       it 'calls fail! and passes on result.error and skips calling the second class' do
-        expect(failure_action_class).to receive(:call)
+        expect(failure_action_class).to receive(:call!)
           .with(foo: 'bar').once.and_call_original
         expect(success_action_class).not_to receive(:call)
 
@@ -209,7 +151,7 @@ describe Actionizer do
         end
 
         it 'calls fail! and passes on result.errors_xxxxx and skips calling the second class' do
-          expect(failure_action_class).to receive(:call)
+          expect(failure_action_class).to receive(:call!)
             .with(foo: 'bar').once.and_call_original
           expect(success_action_class).not_to receive(:call)
 
@@ -222,7 +164,7 @@ describe Actionizer do
       end
     end
 
-    context 'dynamic <FOO>_or_fail invocation' do
+    context 'dynamic <METHOD>! invocation' do
       let(:class_with_find) do
         Class.new do
           include Actionizer
@@ -230,19 +172,23 @@ describe Actionizer do
         end
       end
 
-      it 'allows any method <FOO>_or_fail, as long as the class defines <FOO>' do
-        expect(class_with_find).to receive(:find).with(id: 1234).and_call_original
+      it 'allows any <METHOD> to be called as <METHOD>!' do
+        expect(class_with_find).to receive(:find!).with(id: 1234).and_call_original
         expect_any_instance_of(class_with_find).to receive(:find).and_call_original
-        dummy_class.new.find_or_fail(class_with_find, id: 1234)
+        class_with_find.find!(id: 1234)
       end
 
-      it 'correctly tells you it responds to the method' do
-        expect(dummy_class.new.respond_to?(:whatever_or_fail)).to eq(true)
+      it "doesn't respond to just any '!' method" do
+        expect(dummy_class.respond_to?(:whatever!)).to eq(false)
       end
 
-      it 'still fails if you call a method not defined on the specified class' do
-        expect(class_with_find).to receive(:nope).and_call_original
-        expect { dummy_class.new.nope_or_fail(class_with_find) }.to raise_error(NoMethodError)
+      context "when there's a param error" do
+        let(:defined_inputs_double) { double(check_for_param_error: 'oops') }
+
+        it 'raises an Actionizer::Failure' do
+          expect(class_with_find).to receive(:defined_inputs).and_return(defined_inputs_double)
+          expect { class_with_find.find! }.to raise_error(Actionizer::Failure)
+        end
       end
     end
 
