@@ -18,4 +18,12 @@ describe Actionizer::Failure do
       expect(result).to be_failure
     end
   end
+
+  context 'when created with no args' do
+    let(:result) { described_class.new }
+
+    it 'works and the result is failure by default' do
+      expect(result.output).to be_failure
+    end
+  end
 end
