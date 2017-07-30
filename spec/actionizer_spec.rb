@@ -178,6 +178,11 @@ describe Actionizer do
         class_with_find.find!(id: 1234)
       end
 
+      it 'responds to <METHOD> and <METHOD>!' do
+        expect(class_with_find).to respond_to(:find)
+        expect(class_with_find).to respond_to(:find!)
+      end
+
       it "doesn't respond to just any '!' method" do
         expect(dummy_class.respond_to?(:whatever!)).to eq(false)
       end
