@@ -40,6 +40,10 @@ module Actionizer
     end
 
     def respond_to_missing?(method_name, include_private = false)
+      if method_name.to_s.end_with?('!')
+        method_name = method_name.to_s.chomp('!').to_sym
+      end
+
       new.respond_to?(method_name, include_private)
     end
 
