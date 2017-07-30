@@ -4,6 +4,7 @@ rvm:
   - 2.4.1
 before_install: gem install bundler -v 1.15.3
 script: rubocop -D && bundle exec rspec
+dist: precise
 addons:
   code_climate:
     repo_token: 905e0dd5ba043366250b9ddaf662dd6e1fab6b97b492b11c7a4cd8501877279f
