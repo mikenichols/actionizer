@@ -282,7 +282,26 @@ describe Actionizer do
           end
         end
       end
-    end
 
+      context 'when a type is specified with null: true' do
+        let(:dummy_class) do
+          Class.new do
+            include Actionizer
+            inputs_for(:call) do
+              optional :foo, type: String, null: true
+            end
+            def call; end
+          end
+        end
+
+        context 'when no arg is passed' do
+          let(:result) { dummy_class.call }
+
+          it 'succeeds' do
+            expect(result).to be_success
+          end
+        end
+      end
+    end # type option
   end
 end
