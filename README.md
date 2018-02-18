@@ -117,21 +117,6 @@ end
 
 This code is self-documenting because there's no wiki or comments to read about what's going on here. The code is telling you exactly what's going on.
 
-### Error-checking shorthand: `*_or_fail`
-
-To automatically check for `failure?` and bubble up errors on failure, there's a shorthand: `<METHOD>_or_fail`. It works for any instance method defined on the class you specify.
-```ruby
-class OnboardUser
-  include Actionizer
-
-  def call
-    # This code is identical to the example above
-    call_or_fail(CreateUser, name: input.name, email: input.email)
-    deliver_now_or_fail(SendWelcomeEmail, name: input.name, email: input.email)
-  end
-end
-```
-
 ### Explicitly declare your inputs with `inputs_for`
 
 To more explicitly document the inputs to your Actions, you can use `inputs_for`.
