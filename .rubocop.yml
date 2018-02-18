@@ -1,3 +1,11 @@
+AllCops:
+  TargetRubyVersion: 2.1
+
+Layout/EmptyLinesAroundBlockBody:
+  Enabled: false
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
 Lint/InheritException:
   Enabled: false
 
@@ -12,16 +20,15 @@ Metrics/LineLength:
 Metrics/MethodLength:
   Max: 20
 
+Style/CommentedKeyword:
+  Enabled: false
 Style/Documentation:
-  Enabled: false
-
-Style/EmptyLinesAroundBlockBody:
-  Enabled: false
-Style/EmptyLinesAroundClassBody:
   Enabled: false
 Style/FrozenStringLiteralComment:
   Enabled: false
 Style/IfUnlessModifier:
+  Enabled: false
+Style/InverseMethods:
   Enabled: false
 Style/MutableConstant:
   Enabled: false

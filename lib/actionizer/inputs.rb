@@ -51,7 +51,7 @@ module Actionizer
       end
 
       @declared_params_by_method[method][param] = { required: required,
-                                                    null: false == opts[:null] ? false : true,
+                                                    null: opts[:null] != false,
                                                     type: opts.fetch(:type, nil) }
     end
 
