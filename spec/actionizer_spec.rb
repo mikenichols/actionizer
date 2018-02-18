@@ -44,11 +44,11 @@ describe Actionizer do
       dummy_class.class_eval do
         def call
           raise RuntimeError if input.foo != 'abc'
-          raise RuntimeError if input.bar != %w(do re mi)
+          raise RuntimeError if input.bar != %w[do re mi]
         end
       end
 
-      dummy_class.call(foo: 'abc', bar: %w(do re mi))
+      dummy_class.call(foo: 'abc', bar: %w[do re mi])
     end
   end
 
