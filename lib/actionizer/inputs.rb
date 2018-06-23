@@ -19,7 +19,7 @@ module Actionizer
       end
 
       declared_params_by_method.fetch(method_name, {}).each_pair do |param, attrs|
-        if !attrs.fetch(:null) && params[param].nil?
+        if !attrs.fetch(:null) && params.key?(param) && params.fetch(param).nil?
           return "Param #{param} can't be nil"
         end
 
