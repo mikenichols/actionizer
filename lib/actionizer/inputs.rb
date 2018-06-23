@@ -8,20 +8,28 @@ module Actionizer
 
     def check_for_param_error(method_name, params = {})
       # If no inputs_for was declared, don't do any checking
-      return false if !declared_params_by_method.key?(method_name)
+      if !declared_params_by_method.key?(method_name)
+        return false
+      end
 
       params.each_key do |param|
-        return "Param #{param} not declared" if !declared_params_by_method.fetch(method_name).include?(param)
+        if !declared_params_by_method.fetch(method_name).include?(param)
+          return "Param #{param} not declared"
+        end
       end
 
       declared_params_by_method.fetch(method_name, {}).each_pair do |param, attrs|
-        return "Param #{param} can't be nil" if !attrs.fetch(:null) && params[param].nil?
+        if !attrs.fetch(:null) && params[param].nil?
+          return "Param #{param} can't be nil"
+        end
 
         type = attrs.fetch(:type)
 
         # Type check if param was required, or if optional and passed in
         if attrs.fetch(:required) || params.include?(param)
-          return "Param #{param} must descend from #{type}" if type && !(params[param].class <= type)
+          if type && !(params[param].class <= type)
+            return "Param #{param} must descend from #{type}"
+          end
         end
 
         if attrs.fetch(:required) && !params.include?(param)
