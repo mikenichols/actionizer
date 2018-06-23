@@ -130,6 +130,12 @@ describe Actionizer do
           end
         end
 
+        context 'and nothing is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call).to be_success
+          end
+        end
+
         context 'and nil is passed' do
           it 'succeeds' do
             expect(dummy_class.call(foo: nil)).to be_success
@@ -154,6 +160,12 @@ describe Actionizer do
           end
         end
 
+        context 'and nothing is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call).to be_success
+          end
+        end
+
         context 'and nil is passed' do
           it 'succeeds' do
             expect(dummy_class.call(foo: nil)).to be_success
@@ -175,6 +187,12 @@ describe Actionizer do
               optional :foo, null: false
             end
             def call; end
+          end
+        end
+
+        context 'and nothing is passed' do
+          it 'succeeds' do
+            expect(dummy_class.call).to be_success
           end
         end
 
