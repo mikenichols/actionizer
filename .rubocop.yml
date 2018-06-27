@@ -12,13 +12,13 @@ Lint/InheritException:
 Metrics/AbcSize:
   Max: 32
 Metrics/CyclomaticComplexity:
-  Max: 11
+  Max: 12
 Metrics/PerceivedComplexity:
-  Max: 11
+  Max: 12
 Metrics/LineLength:
   Max: 120
 Metrics/MethodLength:
-  Max: 20
+  Max: 25
 
 Style/CommentedKeyword:
   Enabled: false
