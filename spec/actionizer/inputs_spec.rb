@@ -282,6 +282,7 @@ describe Actionizer do
               expect(dummy_class.call(foo: Integer)).to be_success
             end
           end
+
           context 'and the arg passed is not a descendent' do
             it 'fails' do
               result = dummy_class.call(foo: String)
