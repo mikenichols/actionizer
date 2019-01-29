@@ -23,17 +23,18 @@ module Actionizer
           return "Param #{param} can't be nil"
         end
 
-        type = attrs.fetch(:type)
-
-        # Type check if param was required, or if optional and passed in
-        if attrs.fetch(:required) || params.include?(param)
-          if type && !(params[param].class <= type)
-            return "Param #{param} must descend from #{type}"
-          end
-        end
-
         if attrs.fetch(:required) && !params.include?(param)
           return "Param #{param} is required for #{method_name}"
+        end
+
+        if !params.include?(param)
+          next
+        end
+
+        type = attrs.fetch(:type)
+        param_class = params[param].is_a?(Class) ? params[param] : params[param].class
+        if type && !(param_class <= type)
+          return "Param #{param} must descend from #{type}"
         end
       end
 
