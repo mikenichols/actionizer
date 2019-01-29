@@ -276,6 +276,22 @@ describe Actionizer do
           end
         end
 
+        context 'and the type specified is a parent class' do
+          context 'and the arg passed is a descendent' do
+            it 'succeeds' do
+              expect(dummy_class.call(foo: Integer)).to be_success
+            end
+          end
+
+          context 'and the arg passed is not a descendent' do
+            it 'fails' do
+              result = dummy_class.call(foo: String)
+              expect(result).to be_failure
+              expect(result.error).to eq('Param foo must descend from Numeric')
+            end
+          end
+        end
+
         context 'and nil is passed' do
           it 'fails because of the type check, not because of the nil check' do
             result = dummy_class.call(foo: nil)
