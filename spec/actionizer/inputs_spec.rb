@@ -118,6 +118,85 @@ describe Actionizer do
       end
     end
 
+    context 'with persistence' do
+      class DummyPersistence
+        include Actionizer
+
+        def find
+          output.dummy = 'persistence_result'
+        end
+        def local_find
+          output.dummy = 'local_persistence_result'
+        end
+      end
+
+      context 'when persistence: is defined' do
+        let(:succeeding_class) do
+          Class.new do
+            include Actionizer
+
+            inputs_for :call do
+              required :foo, persistence: DummyPersistence
+            end
+            def call
+              output.lookup = input.foo
+            end
+          end
+        end
+
+        context 'when called with a string' do
+          it 'looks up the id and succeeds' do
+            expect(DummyPersistence).to receive(:find).with(id: 'an id')
+            result = succeeding_class.call(foo: 'an id')
+            expect(result).to be_success
+            expect(result.lookup).to eq 'persistence_result'
+          end
+        end
+
+        context 'when called with something else' do
+          it 'passes it through' do
+            expect(DummyPersistence).not_to receive(:find)
+            result = succeeding_class.call(foo: { this: 'is not an id' })
+            expect(result).to be_success
+            expect(result.lookup).to eq(this: 'is not an id')
+          end
+        end
+      end
+
+      context 'when local_persistence: is defined' do
+        let(:succeeding_class) do
+          Class.new do
+            include Actionizer
+
+            inputs_for :call do
+              required :foo, local_persistence: DummyPersistence
+            end
+            def call
+              output.lookup = input.foo
+            end
+          end
+        end
+
+        context 'when called with a string' do
+          it 'looks up the id and succeeds' do
+            expect(DummyPersistence).to receive(:local_find).with(id: 'an id')
+            result = succeeding_class.call(foo: 'an id')
+            expect(result).to be_success
+            expect(result.lookup).to eq 'local_persistence_result'
+          end
+        end
+
+        context 'when called with something else' do
+          it 'passes it through' do
+            expect(DummyPersistence).not_to receive(:local_find)
+            result = succeeding_class.call(foo: { this: 'is not an id' })
+            expect(result).to be_success
+            expect(result.lookup).to eq(this: 'is not an id')
+          end
+        end
+      end
+    end
+
     describe 'null option' do
       context 'when not specified' do
         let(:dummy_class) do

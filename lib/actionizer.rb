@@ -14,7 +14,7 @@ module Actionizer
 
   module ClassMethods
     def method_missing(method_name, *args, &block)
-      instance = new(*args)
+      instance = new(query_persistence_args(method_name, args))
 
       if method_name.to_s.end_with?('!')
         method_name = method_name.to_s.chomp('!').to_sym
@@ -78,6 +78,26 @@ module Actionizer
 
       defined_inputs.add(param: param, required: required, opts: opts)
     end
+
+    def query_persistence_args(method_name, args)
+      if args.empty?
+        return {}
+      end
+
+      args[0].map do |arg, value|
+        if value.is_a?(String) && persist = defined_inputs.declared_params_by_method[method_name]&.[](arg)&.[](:persistence)
+          [arg, persist.find(id: value).send(persistence_name(persist))]
+        elsif value.is_a?(String) && local_persist = defined_inputs.declared_params_by_method[method_name]&.[](arg)&.[](:local_persistence)
+          [arg, local_persist.local_find(id: value).send(persistence_name(local_persist))]
+        else
+          [arg, value]
+        end
+      end.to_h
+    end
+  end
+
+  def persistence_name(persistence_class)
+    persistence_class.name.split(/([A-Z][a-z]*)/)[1].downcase
   end
 
   def initialize(initial_input = {})

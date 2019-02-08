@@ -61,7 +61,9 @@ module Actionizer
 
       @declared_params_by_method[method][param] = { required: required,
                                                     null: opts[:null] != false,
-                                                    type: opts.fetch(:type, nil) }
+                                                    type: opts.fetch(:type, nil),
+                                                    persistence: opts[:persistence],
+                                                    local_persistence: opts[:local_persistence] }
     end
 
     def no_params_declared?(method)
