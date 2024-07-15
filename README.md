@@ -1,5 +1,23 @@
 # Actionizer
 
+## *** Attention Euna Payments Developers! *** 
+
+This is a copy of the actionizer gem as it existed in v0.15. The gem was incompatible with Ruby 3 and thus needed to be installed in this manner where it is in this vendor_interanl folder. The specific changes that was needed:
+
+`spec.required_ruby_version = '> 3.0'` in `actionizer.gemspec` (changed from 2.1)
+
+Without that change, this error is observed, blocking `bundle install`:
+
+```
+Because actionizer >= 0.10.0 depends on Ruby ~> 2.1
+  and Gemfile depends on actionizer ~> 0.15,
+  Ruby ~> 2.1 is required.
+So, because current Ruby version is = 3.3.0,
+  version solving has failed.
+```
+### ** Thanks for your attention, Euna Payment's Developers ** 
+### Original README continues below:
+
 [![Gem Version](https://badge.fury.io/rb/actionizer.svg)](https://badge.fury.io/rb/actionizer)
 [![Build Status](https://travis-ci.org/mikenichols/actionizer.svg?branch=master)](https://travis-ci.org/mikenichols/actionizer)
 [![Test Coverage](https://codeclimate.com/github/mikenichols/actionizer/badges/coverage.svg)](https://codeclimate.com/github/mikenichols/actionizer/coverage)

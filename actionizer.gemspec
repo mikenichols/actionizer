@@ -1,4 +1,4 @@
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'actionizer/version'
 
@@ -25,13 +25,13 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '~> 2.1'
+  spec.required_ruby_version = '~> 3.3'
 
-  spec.add_development_dependency 'bundler', '~> 1.13'
+  spec.add_development_dependency 'bundler', '~> 2.5.15'
   spec.add_development_dependency 'codeclimate-test-reporter', '~> 0.5'
   spec.add_development_dependency 'pry-byebug', '~> 3.4'
   spec.add_development_dependency 'rake', '~> 11.3'
   spec.add_development_dependency 'rspec', '~> 3.5'
-  spec.add_development_dependency 'rubocop', '0.52.1'
+  spec.add_development_dependency 'rubocop', '1.65.0'
   spec.add_development_dependency 'simplecov', '~> 0.12'
 end

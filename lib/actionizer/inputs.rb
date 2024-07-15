@@ -6,6 +6,7 @@ module Actionizer
       @declared_params_by_method = {}
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
     def check_for_param_error(method_name, params = {})
       # If no inputs_for was declared, don't do any checking
       if !declared_params_by_method.key?(method_name)
@@ -40,6 +41,7 @@ module Actionizer
 
       false
     end
+    # rubocop:enable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
 
     def start(method)
       @method = method
@@ -59,7 +61,7 @@ module Actionizer
         raise ArgumentError, "Please specify a class for type: (#{opts[:type]} is not a class)"
       end
 
-      @declared_params_by_method[method][param] = { required: required,
+      @declared_params_by_method[method][param] = { required:,
                                                     null: opts[:null] != false,
                                                     type: opts.fetch(:type, nil) }
     end

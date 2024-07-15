@@ -24,19 +24,19 @@ module Actionizer
       if instance.respond_to?(method_name)
         error = defined_inputs.check_for_param_error(method_name, *args)
         if error
-          raise Actionizer::Failure.new('Failed.', Actionizer::Result.new(error: error).tap(&:fail))
+          raise Actionizer::Failure.new('Failed.', Actionizer::Result.new(error:).tap(&:fail))
         end
 
         instance.tap(&method_name).output
       else
         super
       end
-    rescue Actionizer::Failure => af
+    rescue Actionizer::Failure => e
       if instance.raise_on_failure
-        raise af
+        raise e
       end
 
-      af.output
+      e.output
     end
 
     def respond_to_missing?(method_name, include_private = false)
@@ -76,7 +76,7 @@ module Actionizer
         raise "You must call #{required ? 'required' : 'optional'} from inside an inputs_for block"
       end
 
-      defined_inputs.add(param: param, required: required, opts: opts)
+      defined_inputs.add(param:, required:, opts:)
     end
   end
 
